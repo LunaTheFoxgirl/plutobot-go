@@ -1,8 +1,8 @@
 package cmds
 
 import (
-	"github.com/member1221/plutobot/core"
-	"github.com/member1221/plutobot/rest"
+	"github.com/Member1221/plutobot-go/rest"
+	"github.com/Member1221/plutobot-go/core"
 )
 
 type SubredditPosts struct {

@@ -7,8 +7,8 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/member1221/plutobot/core"
-	"github.com/member1221/plutobot/cmds"
+	"github.com/Member1221/plutobot-go/core"
+	"github.com/Member1221/plutobot-go/cmds"
 	"fmt"
 	"io/ioutil"
 	"encoding/json"
