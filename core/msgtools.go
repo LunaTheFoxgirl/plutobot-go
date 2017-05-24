@@ -32,6 +32,39 @@ func SliceToHumanListing(slices []string) string {
 	return sl
 }
 
+func SanitizeArgs(slice []string) []string {
+	var fslice []string = make([]string, 0)
+	var current string
+	var inquote bool
+	for i := 0; i < len(slice); i++ {
+		if strings.HasPrefix(slice[i], "\"") {
+			current += slice[i][1:]
+			inquote = true
+			continue
+		}
+
+		if inquote {
+			if strings.HasSuffix(slice[i], "\"") {
+				current += slice[i][:len(slice[i])-1]
+				fslice = append(fslice, slice[i])
+				current = ""
+				inquote = false
+				continue
+			}
+
+			current += slice[i]
+			continue
+		}
+
+		fslice = append(fslice, slice[i])
+	}
+
+	if current != "" {
+		return slice
+	}
+	return fslice
+}
+
 // StringToSlice turns a string into slices based of space character denotation..
 func StringToSlice(text string) (slices []string) {
 	return strings.Split(text, " ")
