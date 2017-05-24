@@ -1,15 +1,18 @@
 package main
 
 import (
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
 )
 
 func Token(mode string) string {
-	token, err := ioutil.ReadFile("~/.config/plutobot-token.tk")
+	token, err := ioutil.ReadFile("./plutobot-token.tk")
 	if err != nil {
-		fmt.Println(err)
-		return ""
+		token, err = ioutil.ReadFile("~/.config/plutobot-token.tk")
+		if err != nil {
+			fmt.Println(err)
+			return ""
+		}
 	}
 	return string(token)
 }

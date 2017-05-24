@@ -6,15 +6,16 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/bwmarrin/discordgo"
-	"github.com/Member1221/plutobot-go/core"
-	"github.com/Member1221/plutobot-go/cmds"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"encoding/json"
 	"net/http"
-	"time"
 	"sync"
+	"time"
+
+	"./cmds"
+	"./core"
+	"github.com/bwmarrin/discordgo"
 )
 
 var dg *discordgo.Session
@@ -24,6 +25,7 @@ var WEBHOOK_REDDIT *discordgo.Webhook = nil
 var ASYNC_END bool = false
 var LAST_REDDIT map[string]string = make(map[string]string)
 var ASYNC_MUTEX sync.Mutex
+var V = &core.Vendor{}
 
 func main() {
 	dg, err = discordgo.New("Bot " + Token("prod"))
@@ -35,6 +37,8 @@ func main() {
 	//Add message handler.
 	dg.AddHandler(onMessageRecieve)
 	dg.AddHandler(onMessageQue)
+	dg.AddHandler(V.Handle)
+
 	err = dg.Open()
 	if err != nil {
 		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_WS_LOAD", 1)
@@ -42,9 +46,9 @@ func main() {
 	}
 	AddCommands()
 	WEBHOOK_REDDIT, err = dg.Webhook("316553534667751427/zgXPRSoXG__mYv6MaokHlHC1fCTsAp_-xxllNbF4aQUjyRe1jok4-iloNY__z5X7a3tO")
-	go func () {
+	go func() {
 		for !ASYNC_END {
-			RedditUpdate("spacex")
+			//RedditUpdate("spacex")
 			time.Sleep(time.Minute)
 		}
 	}()
@@ -146,24 +150,23 @@ func RedditUpdate(subreddit string) bool {
 func onMessageRecieve(s *discordgo.Session, event *discordgo.MessageCreate) {
 
 	go func(s *discordgo.Session, event *discordgo.MessageCreate) {
-			if core.GetCommandsLength() > 0 {
-				if strings.HasPrefix(event.Content, "$") {
-					//s.ChannelMessageDelete(event.ChannelID, event.Message.ID)
-					var substr = strings.Split(event.Content, " ")
-					var dargs = substr[1:]
-					var cmdtag = substr[0][1:]
-					var cmd, err = core.GetCommandByTag(cmdtag)
-					if err != nil {
-						s.ChannelMessageSend(event.ChannelID, "`[`<@"+event.Author.ID+">`] Command not found!`")
-						return
-					}
-					core.LogInfo("Command: "+cmdtag, event.Author.Username)
-					cmd.Callback(core.CommandArgs{Session: s, Event: event, UsedTag: cmdtag}, dargs)
-
+		if core.GetCommandsLength() > 0 {
+			if strings.HasPrefix(event.Content, "$") {
+				//s.ChannelMessageDelete(event.ChannelID, event.Message.ID)
+				var substr = strings.Split(event.Content, " ")
+				var dargs = core.SanitizeArgs(substr[1:])
+				var cmdtag = substr[0][1:]
+				var cmd, err = core.GetCommandByTag(cmdtag)
+				if err != nil {
+					s.ChannelMessageSend(event.ChannelID, "`[`<@"+event.Author.ID+">`] Command not found!`")
+					return
 				}
-			} else {
-				core.LogError("No commands have been implemented.", "CommandHandler")
+				core.LogInfo("Command: "+cmdtag, event.Author.Username)
+				cmd.Callback(core.CommandArgs{Session: s, Event: event, UsedTag: cmdtag}, dargs)
 			}
+		} else {
+			core.LogError("No commands have been implemented.", "CommandHandler")
+		}
 	}(s, event)
 }
 
@@ -178,6 +181,7 @@ func onExit() int {
 func AddCommands() {
 	//core.AddCommand("clearcmd", cmds.ClearCommand, "thepurge", nil)
 	core.AddCommand("reddit", cmds.RedditCommand, "reddit", nil)
+	core.AddCommand("vote", cmds.VoteCommand, "vote", nil)
 }
 
 func ExitCommand(a core.CommandArgs, v []string) bool {

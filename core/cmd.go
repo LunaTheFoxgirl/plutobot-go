@@ -1,10 +1,11 @@
 package core
 
-import "errors"
 import (
-	"github.com/bwmarrin/discordgo"
-	"os"
+	"errors"
 	"fmt"
+	"os"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // CommandCallback is a function or something
@@ -17,10 +18,19 @@ type CommandArgs struct {
 	UsedTag string
 }
 
-func (c CommandArgs) SendMessage(text string) *discordgo.Message{
+func (c CommandArgs) SendMessage(text string) *discordgo.Message {
 	msg, err := c.Session.ChannelMessageSend(c.Event.ChannelID, text)
 	if err != nil {
-		fmt.Println("Failed sending message! @" + c.Event.ChannelID)
+		fmt.Println("Failed sending message! @"+c.Event.ChannelID+", err:", err)
+		return &discordgo.Message{}
+	}
+	return msg
+}
+
+func (c CommandArgs) SendEmbed(embed *discordgo.MessageEmbed) *discordgo.Message {
+	msg, err := c.Session.ChannelMessageSendEmbed(c.Event.ChannelID, embed)
+	if err != nil {
+		fmt.Println("Failed sending embed! @"+c.Event.ChannelID+", err:", err)
 		return &discordgo.Message{}
 	}
 	return msg
@@ -105,7 +115,7 @@ func (c CommandArgs) SendMessageFormatted(text string) {
 }
 
 func (c CommandArgs) SendFile(name, file string) error {
-	fl, err := os.Open(file);
+	fl, err := os.Open(file)
 	if err != nil {
 		return err
 	}

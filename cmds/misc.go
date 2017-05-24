@@ -1,7 +1,7 @@
 package cmds
 
 import (
-	"github.com/Member1221/plutobot-go/core"
+	"../core"
 	"fmt"
 	"time"
 )
@@ -26,7 +26,7 @@ func ClearCommand(a core.CommandArgs, v []string) bool {
 		}
 
 		a.Session.ChannelMessagesBulkDelete(a.Event.ChannelID, ids)
-		time.Sleep(time.Millisecond*500)
+		time.Sleep(time.Millisecond * 500)
 	}
 	a.Session.ChannelMessageDelete(a.Event.ChannelID, msg.ID)
 	return true
