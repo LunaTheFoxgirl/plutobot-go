@@ -34,8 +34,9 @@ func SliceToHumanListing(slices []string) string {
 
 func SanitizeArgs(slice []string) []string {
 	var fslice []string = make([]string, 0)
-	var current string
-	var inquote bool
+	var current string = ""
+	var inquote bool = false
+
 	for i := 0; i < len(slice); i++ {
 		if strings.HasPrefix(slice[i], "\"") {
 			current += slice[i][1:] + " "
@@ -59,7 +60,7 @@ func SanitizeArgs(slice []string) []string {
 		fslice = append(fslice, slice[i])
 	}
 
-	if current == "" {
+	if current != "" {
 		return slice
 	}
 	return fslice
