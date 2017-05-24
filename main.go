@@ -154,7 +154,7 @@ func onMessageRecieve(s *discordgo.Session, event *discordgo.MessageCreate) {
 			if strings.HasPrefix(event.Content, "$") {
 				//s.ChannelMessageDelete(event.ChannelID, event.Message.ID)
 				var substr = strings.Split(event.Content, " ")
-				var dargs = substr[1:]
+				var dargs = core.SanitizeArgs(substr[1:])
 				var cmdtag = substr[0][1:]
 				var cmd, err = core.GetCommandByTag(cmdtag)
 				if err != nil {
@@ -163,7 +163,6 @@ func onMessageRecieve(s *discordgo.Session, event *discordgo.MessageCreate) {
 				}
 				core.LogInfo("Command: "+cmdtag, event.Author.Username)
 				cmd.Callback(core.CommandArgs{Session: s, Event: event, UsedTag: cmdtag}, dargs)
-
 			}
 		} else {
 			core.LogError("No commands have been implemented.", "CommandHandler")
@@ -182,6 +181,7 @@ func onExit() int {
 func AddCommands() {
 	//core.AddCommand("clearcmd", cmds.ClearCommand, "thepurge", nil)
 	core.AddCommand("reddit", cmds.RedditCommand, "reddit", nil)
+	core.AddCommand("vote", cmds.VoteCommand, "vote", nil)
 }
 
 func ExitCommand(a core.CommandArgs, v []string) bool {

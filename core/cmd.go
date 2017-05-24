@@ -21,7 +21,16 @@ type CommandArgs struct {
 func (c CommandArgs) SendMessage(text string) *discordgo.Message {
 	msg, err := c.Session.ChannelMessageSend(c.Event.ChannelID, text)
 	if err != nil {
-		fmt.Println("Failed sending message! @" + c.Event.ChannelID)
+		fmt.Println("Failed sending message! @"+c.Event.ChannelID+", err:", err)
+		return &discordgo.Message{}
+	}
+	return msg
+}
+
+func (c CommandArgs) SendEmbed(embed *discordgo.MessageEmbed) *discordgo.Message {
+	msg, err := c.Session.ChannelMessageSendEmbed(c.Event.ChannelID, embed)
+	if err != nil {
+		fmt.Println("Failed sending embed! @"+c.Event.ChannelID+", err:", err)
 		return &discordgo.Message{}
 	}
 	return msg
