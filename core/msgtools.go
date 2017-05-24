@@ -38,7 +38,7 @@ func SanitizeArgs(slice []string) []string {
 	var inquote bool
 	for i := 0; i < len(slice); i++ {
 		if strings.HasPrefix(slice[i], "\"") {
-			current += slice[i][1:]
+			current += slice[i][1:] + " "
 			inquote = true
 			continue
 		}
@@ -46,20 +46,20 @@ func SanitizeArgs(slice []string) []string {
 		if inquote {
 			if strings.HasSuffix(slice[i], "\"") {
 				current += slice[i][:len(slice[i])-1]
-				fslice = append(fslice, slice[i])
+				fslice = append(fslice, current)
 				current = ""
 				inquote = false
 				continue
 			}
 
-			current += slice[i]
+			current += slice[i] + " "
 			continue
 		}
 
 		fslice = append(fslice, slice[i])
 	}
 
-	if current != "" {
+	if current == "" {
 		return slice
 	}
 	return fslice
