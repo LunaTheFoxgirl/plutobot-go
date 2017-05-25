@@ -13,12 +13,14 @@ func Open(name string) (PlutoDB, error) {
 		return db, err
 	}
 	db.Database = bdb
+	db.Name = name
 
 	return db, nil
 }
 
 type PlutoDB struct {
 	Database *bolt.DB
+	Name string
 }
 
 func (db PlutoDB) EncodeData(data interface{}) ([]byte, error) {
@@ -32,13 +34,21 @@ func (db PlutoDB) EncodeData(data interface{}) ([]byte, error) {
 }
 
 func (db PlutoDB) DecodeData(data []byte, output *interface{}) error {
-	var input bytes.Reader
+	var input bytes.Buffer
 	input.Read(data)
 
-	enc := gob.NewDecoder(input)
+	enc := gob.NewDecoder(&input)
 
 	//Decode the input data, and via the pointer set it at its destination.
 	err := enc.Decode(input)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db PlutoDB) Close() error {
+	err := db.Database.Close()
 	if err != nil {
 		return err
 	}

@@ -5,32 +5,28 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
-
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"sync"
-	"time"
-
-	"./cmds"
-	"./core"
+	"github.com/Member1221/plutobot-go/cmds"
+	"github.com/Member1221/plutobot-go/core"
 	"github.com/bwmarrin/discordgo"
+	"github.com/Member1221/plutobot-go/db"
 )
 
 var dg *discordgo.Session
 var err error
 
-var WEBHOOK_REDDIT *discordgo.Webhook = nil
-var ASYNC_END bool = false
-var LAST_REDDIT map[string]string = make(map[string]string)
-var ASYNC_MUTEX sync.Mutex
 var V = &core.Vendor{}
+var DB db.PlutoDB
 
 func main() {
-	dg, err = discordgo.New("Bot " + Token("prod"))
+	DB, err = db.Open("plutobot")
 	if err != nil {
-		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_LOAD", 1)
+		core.LogFatal("Could not open database \"plutobot\", reason: " + err.Error(), "DATABASE_LOAD", 1)
+		return
+	}
+
+	dg, err = discordgo.New("Bot " + Token(DB))
+	if err != nil {
+		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_LOAD", 2)
 		return
 	}
 
@@ -41,17 +37,10 @@ func main() {
 
 	err = dg.Open()
 	if err != nil {
-		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_WS_LOAD", 1)
+		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_WS_LOAD", 3)
 		return
 	}
 	AddCommands()
-	WEBHOOK_REDDIT, err = dg.Webhook("316553534667751427/zgXPRSoXG__mYv6MaokHlHC1fCTsAp_-xxllNbF4aQUjyRe1jok4-iloNY__z5X7a3tO")
-	go func() {
-		for !ASYNC_END {
-			//RedditUpdate("spacex")
-			time.Sleep(time.Minute)
-		}
-	}()
 
 	core.LogInfoG("PlutoBot Connected! Ctrl-C to exit.", "DISCORD_LOAD")
 	// Wait till Ctrl + C is pressed, then close the connection and exit.
@@ -70,82 +59,7 @@ func onMessageQue(s *discordgo.Session, event *discordgo.MessageCreate) {
 
 }
 
-func RedditUpdate(subreddit string) bool {
-	req, err := http.NewRequest("GET", "https://www.reddit.com/r/"+subreddit+"/new.json", nil)
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	req.Header.Set("User-Agent", "UGx1dG9Cb3Q=")
 
-	// Handle the request
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println(resp.Status)
-		return false
-	}
-
-	str, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-
-	var posts cmds.SubredditPosts
-
-	err = json.Unmarshal(str, &posts)
-	if err != nil {
-
-		fmt.Println(err.Error() + "\n: " + string(str))
-		return false
-	}
-	ASYNC_MUTEX.Lock()
-	if LAST_REDDIT[subreddit] == posts.Data.Children[0].Data.ID {
-		return true
-	}
-	ASYNC_MUTEX.Unlock()
-
-	var thumbnail *discordgo.MessageEmbedThumbnail = nil
-
-	if posts.Data.Children[0].Data.Thumbnail != "self" {
-		thumbnail = &discordgo.MessageEmbedThumbnail{posts.Data.Children[0].Data.Thumbnail, posts.Data.Children[0].Data.Thumbnail, 128, 128}
-	}
-	text := posts.Data.Children[0].Data.Selftext
-	if len(text) > 250 {
-		text = text[:247] + "..."
-	}
-	embed := discordgo.MessageEmbed{
-		"https://reddit.com" + posts.Data.Children[0].Data.Permalink,
-		"rich",
-		posts.Data.Children[0].Data.Title,
-		text,
-		"",
-		0xFF00FF,
-		nil,
-		nil,
-		thumbnail,
-		nil,
-		nil,
-		nil,
-		[]*discordgo.MessageEmbedField{},
-	}
-	params := discordgo.WebhookParams{"", "PlutoBot->Reddit", "", false, "", []*discordgo.MessageEmbed{&embed}}
-
-	err = dg.WebhookExecute(WEBHOOK_REDDIT.ID, WEBHOOK_REDDIT.Token, true, &params)
-	if err != nil {
-		fmt.Println(err.Error())
-		return false
-	}
-	ASYNC_MUTEX.Lock()
-	LAST_REDDIT[subreddit] = posts.Data.Children[0].Data.ID
-	ASYNC_MUTEX.Unlock()
-	return true
-}
 
 func onMessageRecieve(s *discordgo.Session, event *discordgo.MessageCreate) {
 
@@ -171,7 +85,7 @@ func onMessageRecieve(s *discordgo.Session, event *discordgo.MessageCreate) {
 }
 
 func onExit() int {
-	ASYNC_END = true
+
 	dg.Logout()
 	dg.Close()
 	return 0

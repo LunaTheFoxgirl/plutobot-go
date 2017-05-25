@@ -18,6 +18,7 @@ func SliceToString(slices []string) string {
 	return sl
 }
 
+// SliceToHumanListing converts a slice into a human listing of objects, eg. "Cat, dog and bird"
 func SliceToHumanListing(slices []string) string {
 	var sl = ""
 	for indx, val := range slices {
@@ -32,6 +33,7 @@ func SliceToHumanListing(slices []string) string {
 	return sl
 }
 
+// SanitizeArgs Sanitizes the arguments of a slice, by combining indexes which are in quotes.
 func SanitizeArgs(slice []string) []string {
 	var fslice []string = make([]string, 0)
 	var current string = ""
