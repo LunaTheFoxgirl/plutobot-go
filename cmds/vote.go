@@ -9,7 +9,7 @@ import (
 
 	"fmt"
 
-	"../core"
+	"github.com/Member1221/plutobot-go/core"
 	"github.com/bwmarrin/discordgo"
 )
 

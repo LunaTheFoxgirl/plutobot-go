@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"./color"
+	"github.com/Member1221/plutobot-go/core/color"
 )
 
 // LogText contains the different types of text in a log.
