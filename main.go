@@ -33,13 +33,20 @@ func main() {
 		return
 	}
 
-	dg, err = discordgo.New("Bot " + Token(DB))
+	token, err := Token(DB)
 	if err != nil {
-		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_LOAD", 3)
+		core.LogFatal("Token could not be loaded, reason: "+err.Error(), "DATABASE_TOKEN_GET", 4)
 		return
 	}
+	dg, err = discordgo.New("Bot " + token)
+	if err != nil {
+		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_LOAD", 5)
+		return
+	}
+	// Make sure to clear the token from memory.
+	token = ""
 
-	//Add message handler.
+	// Add message handler.
 	dg.AddHandler(onMessageRecieve)
 	dg.AddHandler(onMessageQue)
 	dg.AddHandler(V.Handle)
@@ -47,7 +54,7 @@ func main() {
 	err = dg.Open()
 
 	if err != nil {
-		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_WS_LOAD", 4)
+		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_WS_LOAD", 6)
 		return
 	}
 	AddCommands()
