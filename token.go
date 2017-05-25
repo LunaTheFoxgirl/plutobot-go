@@ -4,7 +4,6 @@ import (
 	"github.com/Member1221/plutobot-go/db"
 	"github.com/boltdb/bolt"
 	"errors"
-	"fmt"
 )
 
 func RegisterToken (db db.PlutoDB, token string) error {
@@ -40,8 +39,5 @@ func Token(db db.PlutoDB) (string, error) {
 		}
 		return nil
 	})
-	if err != nil {
-		fmt.Println(err)
-	}
-	return string(token)
+	return string(token), err
 }
