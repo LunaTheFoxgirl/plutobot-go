@@ -2,7 +2,7 @@ package perms
 
 import (
 	"encoding/json"
-	"equestriaunleashed.com/eclipsingr/celesticore"
+	"../core"
 )
 
 // Rank represents a rank on the server
@@ -22,7 +22,7 @@ func DeserializeRanks(inputJson string) []Rank {
 	var ranks []Rank
 	err := json.Unmarshal([]byte(inputJson), ranks)
 	if err != nil {
-		celesticore.LogError(err.Error(), "RankDeserializer")
+		core.LogError(err.Error(), "RankDeserializer")
 	}
 	return ranks
 }
