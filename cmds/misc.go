@@ -1,7 +1,7 @@
 package cmds
 
 import (
-	"../core"
+	"github.com/Member1221/plutobot-go/core"
 	"fmt"
 	"time"
 )
