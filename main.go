@@ -19,14 +19,23 @@ var DB db.PlutoDB
 
 func main() {
 	DB, err = db.Open("plutobot")
+	if len(os.Args[1:]) > 0 {
+		args := os.Args[1:]
+		if args[0] == "--registertoken" {
+			err := RegisterToken(DB, args[1])
+			if err != nil {
+				core.LogFatal("Could not write token to databse, reason: " + err.Error(), "DATABASE_TOKEN_SET", 1)
+			}
+		}
+	}
 	if err != nil {
-		core.LogFatal("Could not open database \"plutobot\", reason: " + err.Error(), "DATABASE_LOAD", 1)
+		core.LogFatal("Could not open database \"plutobot\", reason: " + err.Error(), "DATABASE_LOAD", 2)
 		return
 	}
 
 	dg, err = discordgo.New("Bot " + Token(DB))
 	if err != nil {
-		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_LOAD", 2)
+		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_LOAD", 3)
 		return
 	}
 
@@ -36,8 +45,9 @@ func main() {
 	dg.AddHandler(V.Handle)
 
 	err = dg.Open()
+
 	if err != nil {
-		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_WS_LOAD", 3)
+		core.LogFatal("Discord could not connect, reason: "+err.Error(), "DISCORD_WS_LOAD", 4)
 		return
 	}
 	AddCommands()
