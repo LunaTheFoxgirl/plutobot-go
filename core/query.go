@@ -25,8 +25,8 @@ type DataRecieve struct {
 
 const (
 	TERM = -1
-	emojiAdd = iota
-	emojiDel
+	reactionAdd = iota
+	reactionDel
 	messAdd
 	messDel
 	messEdit
@@ -41,9 +41,9 @@ type Vendor struct {
 func (v *Vendor) Handle(s *discordgo.Session, a interface{}) { // as this is an interface, discord will send *all* events through here
 	switch a.(type) {
 	case *discordgo.MessageReactionAdd:
-		v.spread(DataRecieve{emojiAdd, a})
+		v.spread(DataRecieve{reactionAdd, a})
 	case *discordgo.MessageReactionRemove:
-		v.spread(DataRecieve{emojiDel, a})
+		v.spread(DataRecieve{reactionDel, a})
 	case *discordgo.MessageCreate:
 		v.spread(DataRecieve{messAdd, a})
 	case *discordgo.MessageDelete:
