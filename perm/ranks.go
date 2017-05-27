@@ -1,8 +1,8 @@
 package perms
 
 import (
-	"encoding/json"
 	"../core"
+	"encoding/json"
 )
 
 // Rank represents a rank on the server
