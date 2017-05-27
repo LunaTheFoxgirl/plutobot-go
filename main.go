@@ -1,14 +1,14 @@
 package main
 
 import (
+	"github.com/Member1221/plutobot-go/cmds"
+	"github.com/Member1221/plutobot-go/core"
+	"github.com/Member1221/plutobot-go/db"
+	"github.com/bwmarrin/discordgo"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
-	"github.com/Member1221/plutobot-go/cmds"
-	"github.com/Member1221/plutobot-go/core"
-	"github.com/bwmarrin/discordgo"
-	"github.com/Member1221/plutobot-go/db"
 )
 
 var dg *discordgo.Session
@@ -24,12 +24,12 @@ func main() {
 		if args[0] == "--registertoken" {
 			err := RegisterToken(DB, args[1])
 			if err != nil {
-				core.LogFatal("Could not write token to databse, reason: " + err.Error(), "DATABASE_TOKEN_SET", 1)
+				core.LogFatal("Could not write token to databse, reason: "+err.Error(), "DATABASE_TOKEN_SET", 1)
 			}
 		}
 	}
 	if err != nil {
-		core.LogFatal("Could not open database \"plutobot\", reason: " + err.Error(), "DATABASE_LOAD", 2)
+		core.LogFatal("Could not open database \"plutobot\", reason: "+err.Error(), "DATABASE_LOAD", 2)
 		return
 	}
 
@@ -73,10 +73,8 @@ func main() {
 }
 
 func onMessageQue(s *discordgo.Session, event *discordgo.MessageCreate) {
-	DB.Addmessage(event.Message)
+	DB.AddMessage(event.Message)
 }
-
-
 
 func onMessageRecieve(s *discordgo.Session, event *discordgo.MessageCreate) {
 

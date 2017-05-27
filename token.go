@@ -1,13 +1,13 @@
 package main
 
 import (
+	"errors"
 	"github.com/Member1221/plutobot-go/db"
 	"github.com/boltdb/bolt"
-	"errors"
 )
 
-func RegisterToken (db db.PlutoDB, token string) error {
-	err := db.Database.Update(func (tx *bolt.Tx) error {
+func RegisterToken(db db.PlutoDB, token string) error {
+	err := db.Database.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte("credentials"))
 		if err != nil {
 			return err
@@ -27,7 +27,7 @@ func RegisterToken (db db.PlutoDB, token string) error {
 
 func Token(db db.PlutoDB) (string, error) {
 	var token []byte
-	err := db.Database.Update(func (tx *bolt.Tx) error {
+	err := db.Database.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte("credentials"))
 		if err != nil {
 			return err

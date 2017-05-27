@@ -14,17 +14,16 @@ type ticket struct {
 
 	// vendor info here
 	Attachedvendor *Vendor
-	ID uint
+	ID             uint
 }
-
 
 type DataRecieve struct {
 	EventType int // from const
-	A interface{}
+	A         interface{}
 }
 
 const (
-	TERM = -1
+	TERM        = -1
 	reactionAdd = iota
 	reactionDel
 	messAdd
@@ -59,17 +58,17 @@ func (v *Vendor) TERMINATE() {
 
 func (v *Vendor) spread(d DataRecieve) {
 	for _, t := range v.T {
-		go func() {t.Data_hook <- d}()
+		go func() { t.Data_hook <- d }()
 	}
 }
 
 func (v *Vendor) Request(t *ticket) {
 
-		v.Lock()
-		defer v.Unlock()
-	v.latestID+=1
-		v.T[v.latestID] = t
-		v.T[v.latestID].Attachedvendor = v
+	v.Lock()
+	defer v.Unlock()
+	v.latestID += 1
+	v.T[v.latestID] = t
+	v.T[v.latestID].Attachedvendor = v
 	v.T[v.latestID].ID = v.latestID
 }
 

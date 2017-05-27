@@ -68,7 +68,6 @@ func RedditCommand(a core.CommandArgs, v []string) bool {
 	return true
 }
 
-
 // TODO: Reimplement this.
 /*
 func RedditUpdate(subreddit string) bool {

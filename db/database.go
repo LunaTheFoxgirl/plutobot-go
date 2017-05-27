@@ -1,15 +1,15 @@
 package db
 
 import (
-	"github.com/boltdb/bolt"
-	"encoding/gob"
 	"bytes"
+	"encoding/gob"
 	"fmt"
+	"github.com/boltdb/bolt"
 )
 
 func Open(name string) (PlutoDB, error) {
 	var db PlutoDB = PlutoDB{}
-	bdb , err := bolt.Open(name + ".pldb", 0600, nil)
+	bdb, err := bolt.Open(name+".pldb", 0600, nil)
 	if err != nil {
 		return db, err
 	}
@@ -21,7 +21,7 @@ func Open(name string) (PlutoDB, error) {
 
 type PlutoDB struct {
 	Database *bolt.DB
-	Name string
+	Name     string
 }
 
 func (db PlutoDB) EncodeData(data interface{}) ([]byte, error) {
