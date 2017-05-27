@@ -73,7 +73,7 @@ func main() {
 }
 
 func onMessageQue(s *discordgo.Session, event *discordgo.MessageCreate) {
-
+	DB.Addmessage(event.Message)
 }
 
 
@@ -102,6 +102,8 @@ func onMessageRecieve(s *discordgo.Session, event *discordgo.MessageCreate) {
 }
 
 func onExit() int {
+
+	DB.Close()
 
 	dg.Logout()
 	dg.Close()

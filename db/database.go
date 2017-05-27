@@ -4,6 +4,7 @@ import (
 	"github.com/boltdb/bolt"
 	"encoding/gob"
 	"bytes"
+	"fmt"
 )
 
 func Open(name string) (PlutoDB, error) {
@@ -33,15 +34,15 @@ func (db PlutoDB) EncodeData(data interface{}) ([]byte, error) {
 	return output.Bytes(), nil
 }
 
-func (db PlutoDB) DecodeData(data []byte, output *interface{}) error {
-	var input bytes.Buffer
-	input.Read(data)
+func (db PlutoDB) DecodeData(data []byte, output interface{}) error {
+	var input = bytes.NewBuffer(data)
 
-	enc := gob.NewDecoder(&input)
+	enc := gob.NewDecoder(input)
 
 	//Decode the input data, and via the pointer set it at its destination.
-	err := enc.Decode(input)
+	err := enc.Decode(&output)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil
