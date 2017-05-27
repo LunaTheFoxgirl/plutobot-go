@@ -32,7 +32,9 @@ func (p PlutoDB) AddMessage(m *discordgo.Message) {
 			return err
 		}
 
-		B, err := p.EncodeData(m)
+		M := Message{m, nil, false, nil}
+
+		B, err := p.EncodeData(M)
 		if err != nil {
 			core.LogError("Unknown error in encoding message "+m.ID+": "+err.Error(), "PB_STORE")
 			return err
@@ -63,8 +65,8 @@ func (p PlutoDB) IdDate(id string) time.Time {
 	return time.Unix(((i/4194304)+int64(1420070400000))/1000, 0)
 }
 
-func (p PlutoDB) GetMessage(id string) (*discordgo.Message, error) {
-	var m = &discordgo.Message{}
+func (p PlutoDB) GetMessage(id string) (*Message, error) {
+	var m = &Message{}
 	err := p.Database.View(func(tx *bolt.Tx) error {
 		date := p.IdDate(id)
 		if date.IsZero() {
@@ -96,8 +98,8 @@ func (p PlutoDB) GetMessage(id string) (*discordgo.Message, error) {
 	return m, err
 }
 
-func (p PlutoDB) GetMessages(from, till time.Time) ([]*discordgo.Message, error) {
-	var ms []*discordgo.Message
+func (p PlutoDB) GetMessages(from, till time.Time) ([]*Message, error) {
+	var ms []*Message
 	err := p.Database.View(func(tx *bolt.Tx) error {
 		mr := tx.Bucket([]byte("messages"))
 		if mr != nil {
@@ -123,7 +125,7 @@ func (p PlutoDB) GetMessages(from, till time.Time) ([]*discordgo.Message, error)
 					continue
 				}
 
-				m := &discordgo.Message{}
+				m := &Message{}
 				err = p.DecodeData(v, m)
 				if err != nil {
 					return ERR_DECODE_MESSAGE(string(k), err)
@@ -136,4 +138,16 @@ func (p PlutoDB) GetMessages(from, till time.Time) ([]*discordgo.Message, error)
 	})
 
 	return ms, err
+}
+
+type Message struct {
+	M           *discordgo.Message
+	Edits       []*MessageEdit
+	Deleted     bool
+	DeletedWhen time.Time // nil if not caught
+}
+
+type MessageEdit struct {
+	At         time.Time
+	NewContent string
 }
